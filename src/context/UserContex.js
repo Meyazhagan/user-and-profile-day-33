@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
-import UserData from "../Data/UserServices";
+import User from "../Data/UserServices";
 import React from "react";
-import { toast } from "react-toastify";
+import { Toastify } from "../components/common/Toastify";
 import ToastMessage from "../components/common/Toast";
 
 export const UserContext = createContext();
@@ -11,8 +11,8 @@ function UserProvider({ children }) {
 
   const getIndex = (id) => users.findIndex((u) => u.id === id);
 
-  const getALlUser = () => {
-    const users = UserData.getALl();
+  const getALlUser = async () => {
+    const { data: users } = await User.getALl();
     setUsers(users);
   };
 
@@ -21,35 +21,52 @@ function UserProvider({ children }) {
     return { ...users[index] };
   };
 
-  const handleCreateUser = (newUser) => {
+  const handleCreateUser = async (newUser) => {
     const prevUsers = users;
     const addInfo = {
-      id: UserData.genId().next().value,
       skill: [],
       profile: [],
     };
-    const newUsers = [{ ...addInfo, ...newUser }, ...users];
+    newUser = { ...addInfo, ...newUser };
+
+    const newUsers = [newUser, ...users];
     setUsers(newUsers);
-    UserData.update(newUsers);
-    toast.success(
-      <ToastMessage
-        messaage={"Created The User"}
-        onUndo={() => setUsers(prevUsers)}
-      />
-    );
+
+    Toastify(User.create(newUser), {
+      pending: "Creating the new user",
+      onSuccess: () => (
+        <ToastMessage
+          messaage="Created The New User"
+          onUndo={() => setUsers(prevUsers)}
+        />
+      ),
+      onError: (data) => {
+        setUsers(prevUsers);
+        return data?.response?.data?.message || "An Unexpected Error";
+      },
+    });
   };
   const handleUpdateUser = (id, user, message) => {
     const prevUsers = users;
     const newUsers = [...users];
     const index = getIndex(id);
+
     newUsers[index] = { ...newUsers[index], ...user };
     setUsers(newUsers);
-    toast.info(
-      <ToastMessage
-        messaage={message || "Updated The User"}
-        onUndo={() => setUsers(prevUsers)}
-      />
-    );
+
+    Toastify(User.update(id, newUsers[index]), {
+      pending: "Updating the user or profile",
+      onSuccess: () => (
+        <ToastMessage
+          messaage={message || `Updated The User`}
+          onUndo={() => setUsers(prevUsers)}
+        />
+      ),
+      onError: (data) => {
+        setUsers(prevUsers);
+        return data?.response?.data?.message || "An Unexpected Error";
+      },
+    });
   };
   const handleDeleteUser = (id) => {
     const prevUsers = users;
@@ -57,13 +74,19 @@ function UserProvider({ children }) {
     const index = getIndex(id);
     newUsers.splice(index, 1);
     setUsers(newUsers);
-    UserData.update(newUsers);
-    toast.error(
-      <ToastMessage
-        messaage={"Deleted The User"}
-        onUndo={() => setUsers(prevUsers)}
-      />
-    );
+    Toastify(User.remove(id), {
+      pending: "Deleting the user",
+      onSuccess: () => (
+        <ToastMessage
+          messaage="Deleted The User"
+          onUndo={() => setUsers(prevUsers)}
+        />
+      ),
+      onError: (data) => {
+        setUsers(prevUsers);
+        return data?.response?.data?.message || "An Unexpected Error";
+      },
+    });
   };
 
   useEffect(() => {

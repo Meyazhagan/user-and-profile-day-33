@@ -1,29 +1,30 @@
-import Users from "./User.json";
-
-const USER_KEY = "users";
+import http from "./http";
 
 const getALl = () => {
-  const USER_VALUE = localStorage.getItem(USER_KEY);
-  if (!USER_VALUE || (USER_VALUE && JSON.parse(USER_VALUE).length < 1)) {
-    localStorage.setItem(USER_KEY, JSON.stringify(Users));
-    return Users;
-  }
-  return JSON.parse(USER_VALUE);
+  return http.get("/");
 };
 
-const USER_VALUE = localStorage.getItem(USER_KEY);
-let i =
-  (USER_VALUE && JSON.parse(USER_VALUE).length) + 100 || Users.length + 100;
-function* genId() {
-  while (true) yield "" + ++i;
-}
-const update = (updatedUser) => {
-  localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+const getUser = (id) => {
+  return http.get(`/${id}`);
+};
+
+const create = (user) => {
+  return http.post("/", user);
+};
+
+const update = (id, user) => {
+  return http.put(`/${id}`, user);
+};
+
+const remove = (id) => {
+  return http.delete(`/${id}`);
 };
 
 const methods = {
   getALl,
+  getUser,
+  create,
   update,
-  genId,
+  remove,
 };
 export default methods;

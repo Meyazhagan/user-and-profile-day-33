@@ -13,7 +13,7 @@ function UserCard(props) {
 
   return (
     <div className={classes}>
-      <section className="bg-alpha p-3 rounded-2xl h-full">
+      <section className="bg-alpha p-3 rounded-2xl h-full flex flex-col justify-between">
         <div className="flex">
           <img
             src={avatar}

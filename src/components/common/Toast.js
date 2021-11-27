@@ -8,7 +8,6 @@ function ToastMessage({ closeToast, onUndo, messaage }) {
         className="bg-alpha px-3 py-1 rounded-lg"
         onClick={() => {
           onUndo();
-          closeToast();
         }}
       >
         Undo
