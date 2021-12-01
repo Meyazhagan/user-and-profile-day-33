@@ -29,17 +29,17 @@ function UserProvider({ children }) {
     };
     newUser = { ...addInfo, ...newUser };
 
-    const newUsers = [newUser, ...users];
-    setUsers(newUsers);
-
     Toastify(User.create(newUser), {
       pending: "Creating the new user",
-      onSuccess: () => (
-        <ToastMessage
+      onSuccess: ({data}) => {
+          const newUsers = [data, ...users];
+    setUsers(newUsers);
+        
+        return <ToastMessage
           messaage="Created The New User"
           onUndo={() => setUsers(prevUsers)}
         />
-      ),
+    },
       onError: (data) => {
         setUsers(prevUsers);
         return data?.response?.data?.message || "An Unexpected Error";
